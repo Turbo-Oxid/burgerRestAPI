@@ -76,7 +76,7 @@ app.get("/api/dishes/:id", function(req, resolve){
 });
 
 app.post("/api/orders", jsonParser, function(req, resolve) {
-    if(req.body.phone==undefined||req.body.client==undefined||req.body.shop==undefined||req.body.menuCat==undefined||req.body.food==undefined) return resolve.status(400);
+    //if(!req.body.phone||!req.body.client||!req.body.shop||!req.body.menuCat||!req.body.food) return resolve.status(400);
     let order = { 
         "id": 0,
         "price": 0,
@@ -90,16 +90,16 @@ app.post("/api/orders", jsonParser, function(req, resolve) {
         id: {$in: req.body.food}
     }).toArray((err, res) => {
         if(!res) return resolve.status(400);
-        for(var i = 0; i<res.length;i++){
+        for(var i = 0; i < res.length; i++){
             order.price += res[i].price;
         }
     });
     db.collection("orders").find().sort({
         id: -1
     }).limit(1).toArray((err, res) => {
-        if (res.length != 0){ id = res[0].id + 1 }else{ id = 1};
-        
+        if (res.length != 0){ order.id = res[0].id + 1 }else{ order.id = 1};
         db.collection("orders").insertOne(order);
+        resolve.send({id:order.id, price:order.price});
     });
 });
 
