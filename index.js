@@ -13,9 +13,7 @@ MongoClient.connect("mongodb://localhost:27017", {
 			"\nРазделов:\t\t" + res.collections +
 			"\nОбъектов:\t\t" + res.objects +
 			"\nРазмер базы:\t\t" + (res.dataSize / 1024 / 1024).toFixed(2) + "МБ");
-        app.listen(8080, function(){
-            console.log("Сервер запущен!");
-        });
+        
             
     });
 });
@@ -24,62 +22,97 @@ const express = require("express");
 const app = express();
 const jsonParser = express.json();
 
-app.get("/api/companies", function(req, res){
-    console.log(1);
-    db.collection("shops").find().toArray((err, res) => {
+app.get("/api/companies", function(req, resolve){
+    db.collection("shops").find({}, {"_id":false}).toArray((err, res) => {
         if(err) console.log(err);
-        res.send("hello");
+        resolve.send(res);
     });
         
 });
 
-app.get("/api/companies/:id", function(req, res){
-    console.log(1);
+app.get("/api/companies/:id", function(req, resolve){
     db.collection("shops").find({
-        id: req.params.id
-    }).toArray((err, res) => {
+        id: Number(req.params.id)
+    }, {"_id":0}).toArray((err, res) => {
         if(err) console.log(err);
-        res.send(res);
+        resolve.send(res);
     });
         
 });
 
-app.get("/api/categories", function(req, res){
+app.get("/api/categories", function(req, resolve){
     console.log(1);
     db.collection("menu").find().toArray((err, res) => {
         if(err) console.log(err);
-        res.send(res);
+        resolve.send(res);
     });
         
 });
 
-app.get("/api/categories/:id", function(req, res){
-    console.log(1);
+app.get("/api/categories/:id", function(req, resolve){
     db.collection("menu").find({
-        id: req.params.id
+        id: Number(req.params.id)
     }).toArray((err, res) => {
         if(err) console.log(err);
-        res.send(res);
+        resolve.send(res);
     });
         
 });
 
-app.get("/api/dishes", function(req, res){
-    console.log(1);
+app.get("/api/dishes", function(req, resolve){
     db.collection("food").find().toArray((err, res) => {
         if(err) console.log(err);
-        res.send(res);
+        resolve.send(res);
     });
         
 });
 
-app.get("/api/dishes/:id", function(req, res){
-    console.log(1);
+app.get("/api/dishes/:id", function(req, resolve){
     db.collection("food").find({
-        id: req.params.id
+        id: Number(req.params.id)
     }).toArray((err, res) => {
         if(err) console.log(err);
-        res.send(res);
+        resolve.send(res);
+    });   
+});
+
+app.post("/api/orders", function(req, resolve) {
+    if(req.body.phone==undefined||req.body.client==undefined||req.body.shop==undefined||req.body.menuCat==undefined||req.body.food==undefined) resolve.status(400);
+    let order = { 
+        "id": 0,
+        "price": 0,
+        "phone": "000 000 00 00",
+        "client": "Клієнт0",
+        "shop": "Заклад0",
+        "menuCatId": [1],
+        "foodId": [0]
+    }
+    db.collection("food").find({
+        id: {$in: req.body.food}
+    }).toArray((err, res) => {
+        for(var i = 0; i<res.length;i++){
+            order.price += res[i].price;
+        }
     });
+    db.collection("orders").find().sort({
+        id: -1
+    }).limit(1).toArray((err, res) => {
+        if (res.length != 0){ id = res[0].id + 1 }else{ id = 1};
         
+        db.collection("orders").insertOne(order);
+    })
+    res.send('This is not implemented now');
+});
+
+app.get("/api/orders/:id", function(req, resolve){
+    db.collection("orders").find({
+        id: Number(req.params.id)
+    }).toArray((err, res) => {
+        if(err) console.log(err);
+        resolve.send(res);
+    });   
+});
+
+app.listen(8080, function(){
+    console.log("Сервер запущен!");
 });
