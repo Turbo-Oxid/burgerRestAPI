@@ -13,7 +13,7 @@ MongoClient.connect("mongodb://localhost:27017", {
 			"\nРазделов:\t\t" + res.collections +
 			"\nОбъектов:\t\t" + res.objects +
 			"\nРазмер базы:\t\t" + (res.dataSize / 1024 / 1024).toFixed(2) + "МБ");
-        app.listen(3000, function(){
+        app.listen(8080, function(){
             console.log("Сервер запущен!");
         });
             
@@ -28,8 +28,58 @@ app.get("/api/companies", function(req, res){
     console.log(1);
     db.collection("shops").find().toArray((err, res) => {
         if(err) console.log(err);
+        res.send("hello");
+    });
+        
+});
+
+app.get("/api/companies/:id", function(req, res){
+    console.log(1);
+    db.collection("shops").find({
+        id: req.params.id
+    }).toArray((err, res) => {
+        if(err) console.log(err);
         res.send(res);
     });
         
 });
 
+app.get("/api/categories", function(req, res){
+    console.log(1);
+    db.collection("menu").find().toArray((err, res) => {
+        if(err) console.log(err);
+        res.send(res);
+    });
+        
+});
+
+app.get("/api/categories/:id", function(req, res){
+    console.log(1);
+    db.collection("menu").find({
+        id: req.params.id
+    }).toArray((err, res) => {
+        if(err) console.log(err);
+        res.send(res);
+    });
+        
+});
+
+app.get("/api/dishes", function(req, res){
+    console.log(1);
+    db.collection("food").find().toArray((err, res) => {
+        if(err) console.log(err);
+        res.send(res);
+    });
+        
+});
+
+app.get("/api/dishes/:id", function(req, res){
+    console.log(1);
+    db.collection("food").find({
+        id: req.params.id
+    }).toArray((err, res) => {
+        if(err) console.log(err);
+        res.send(res);
+    });
+        
+});
